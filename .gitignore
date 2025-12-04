@@ -1,0 +1,12 @@
+_targets/
+.vscode/
+daily_raw_meteo/
+data-raw/calibration*
+data-raw/*.png
+data-raw/*.gpkg
+data-raw/*.rds
+data-raw/mapSpain_cache/
+data-raw/debug.R
+data-raw/*initialized.rds
+interpolators/
+.Renviron

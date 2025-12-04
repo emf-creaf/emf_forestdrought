@@ -1,0 +1,27 @@
+id: emf_foresdrought
+emf_type: pipeline
+emf_public: false
+emf_automatized: true
+emf_reproducible: true
+emf_draft: false
+emf_data_type: internal_data
+data_repository: https://data-emf.creaf.cat/public/gpkg/daily_modelled_forests/
+model_repository: ''
+nodes:
+- medfate
+- medfateland
+- emf_meteorology
+authors:
+- vgranda
+tags:
+- water balance
+- model
+- spain
+links:
+  url_source: https://github.com/emf-creaf/emf_foresdrought
+requirements: ''
+description: Pipeline to generate forest water balance data for all Spain
+title: EMF ForestDrought Pipeline
+date: '2025-12-04'
+date_lastmod: '2025-12-04'
+

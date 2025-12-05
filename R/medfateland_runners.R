@@ -68,7 +68,7 @@ run_daily_medfateland <- function(date_to_process) {
   # day_files <- purrr::map_chr(
   # day_files <- furrr::future_map_chr(
   # mirai daemons
-  mirai::daemons(12)
+  mirai::daemons(8)
   withr::defer(mirai::daemons(0))
   mirai::everywhere({}, .update_state = .update_state)
   day_files <- mirai::mirai_map(

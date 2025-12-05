@@ -18,7 +18,7 @@ tar_option_set(
   # iteration mode default to list
   iteration = "list",
   # garbage collection
-  garbage_collection = 50
+  garbage_collection = 5
 )
 
 # Run the R scripts in the R/ folder with your custom functions:

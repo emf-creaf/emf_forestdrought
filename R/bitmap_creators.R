@@ -76,7 +76,7 @@ create_medfateland_bitmap <- function(parquet_files) {
     if (dplyr::cur_column() %in% c("DDS", "SFP", "CFP")) {
       reverse <- TRUE
     }
-    scales::col_numeric(
+    res <- scales::col_numeric(
       c(
         "#FF0D50", "#FB7C82", "#FEABAC", "#FFD7D7", "#F2EFF2",
         "#9AAABA", "#4B8AA1", "#007490", "#006584"
@@ -84,6 +84,21 @@ create_medfateland_bitmap <- function(parquet_files) {
       c(min(medfateland_var, na.rm = TRUE), max(medfateland_var, na.rm = TRUE)),
       na.color = "#FFFFFF00", reverse = reverse, alpha = TRUE
     )(medfateland_var)
+
+    if (medfateland_var == "Psi") {
+      res <- scales::col_numeric(
+        scales::gradient_n_pal(
+          c(
+            "#FF0D50", "#FB7C82", "#FEABAC", "#FFD7D7", "#F2EFF2",
+            "#9AAABA", "#4B8AA1", "#007490", "#006584"
+          ),
+          c(0, 0.45, 0.65, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
+        ),
+        c(min(medfateland_var, na.rm = TRUE), max(medfateland_var, na.rm = TRUE)),
+        na.color = "#FFFFFF00", reverse = reverse, alpha = TRUE
+      )(medfateland_var)
+    }
+    return(res)
   }
   color_tables <- terra::values(raster_platon_4326) |>
     dplyr::as_tibble() |>

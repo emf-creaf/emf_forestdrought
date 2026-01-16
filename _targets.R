@@ -18,14 +18,14 @@ tar_option_set(
   # iteration mode default to list
   iteration = "list",
   # garbage collection
-  garbage_collection = 5
+  garbage_collection = 50
 )
 
 # Run the R scripts in the R/ folder with your custom functions:
 tar_source()
 
 # debug
-# debug(run_daily_medfateland)
+# debug(write_medfateland_timeseries)
 
 # dates
 dates_to_process <- seq(Sys.Date() - 385, Sys.Date() - 5, by = "day")
@@ -39,7 +39,8 @@ list(
   # previous date. So in this case, error should stop the pipeline.
   tar_target(
     daily_models, run_daily_medfateland(dates),
-    pattern = map(dates)
+    pattern = map(dates),
+    garbage_collection = TRUE
   ),
   # parquet writer
   tar_target(
@@ -53,15 +54,16 @@ list(
     bitmaps, create_medfateland_bitmap(parquet_files),
     pattern = map(parquet_files),
     # continue on error, return NULL for those failed files
-    error = "null"
+    error = "null",
+    garbage_collection = TRUE
   ),
   tar_target(
     bitmaps_table, write_medfateland_bitmaps(bitmaps)
   ),
   # timeseries for regions
   tar_target(
-    provincia_daily_averages,
-    calculate_daily_averages(parquet_files, "provincia"),
+    municipio_daily_averages,
+    calculate_daily_averages(parquet_files, "municipio"),
     pattern = map(parquet_files),
     # continue on error, return NULL for those failed files
     error = "null"
@@ -74,9 +76,19 @@ list(
     error = "null"
   ),
   tar_target(
+    provincia_daily_averages,
+    calculate_daily_averages(parquet_files, "provincia"),
+    pattern = map(parquet_files),
+    # continue on error, return NULL for those failed files
+    error = "null"
+  ),
+  tar_target(
     provincia_timeseries, write_medfateland_timeseries(provincia_daily_averages)
   ),
   tar_target(
     comarca_timeseries, write_medfateland_timeseries(comarca_daily_averages)
+  ),
+  tar_target(
+    municipio_timeseries, write_medfateland_timeseries(municipio_daily_averages)
   )
 )

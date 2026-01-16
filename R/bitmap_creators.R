@@ -73,7 +73,7 @@ create_medfateland_bitmap <- function(parquet_files) {
   # color tables
   color_table_gen <- function(medfateland_var) {
     reverse <- FALSE
-    if (dplyr::cur_column() %in% c("DDS")) {
+    if (dplyr::cur_column() %in% c("DDS", "SFP", "CFP")) {
       reverse <- TRUE
     }
     scales::col_numeric(
@@ -106,7 +106,7 @@ create_medfateland_bitmap <- function(parquet_files) {
   # encoded png and some metadata (extent, palette, min and max values...)
   raster_platon_w <- terra::wrap(raster_platon_4326)
   # mirai daemons
-  mirai::daemons(12)
+  mirai::daemons(12, output = TRUE)
   withr::defer(mirai::daemons(0))
   bitmap_tibble <- mirai::mirai_map(
     .x = names(raster_platon_4326),
@@ -126,6 +126,10 @@ create_medfateland_bitmap <- function(parquet_files) {
         "data:image/png;base64,",
         base64enc::base64encode(temp_path)
       )
+
+      cli::cli_inform(c(
+        "v" = medfateland_var
+      ))
 
       dplyr::tibble(
         date = date_to_process,

@@ -20,7 +20,7 @@ province_files <- list.files(
 custom_control <- medfate::defaultControl()
 custom_control$fireHazardResults <- TRUE
 
-mirai::daemons(12)
+mirai::daemons(12, output = TRUE)
 withr::defer(mirai::daemons(0))
 
 forests_sf <- province_files |>

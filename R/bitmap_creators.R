@@ -76,7 +76,7 @@ create_medfateland_bitmap <- function(parquet_files) {
     if (dplyr::cur_column() %in% c("DDS", "SFP", "CFP")) {
       reverse <- TRUE
     }
-    res <- scales::col_numeric(
+    scales::col_numeric(
       c(
         "#FF0D50", "#FB7C82", "#FEABAC", "#FFD7D7", "#F2EFF2",
         "#9AAABA", "#4B8AA1", "#007490", "#006584"
@@ -84,21 +84,19 @@ create_medfateland_bitmap <- function(parquet_files) {
       c(min(medfateland_var, na.rm = TRUE), max(medfateland_var, na.rm = TRUE)),
       na.color = "#FFFFFF00", reverse = reverse, alpha = TRUE
     )(medfateland_var)
-
-    if (medfateland_var == "Psi") {
-      res <- scales::col_numeric(
-        scales::gradient_n_pal(
-          c(
-            "#FF0D50", "#FB7C82", "#FEABAC", "#FFD7D7", "#F2EFF2",
-            "#9AAABA", "#4B8AA1", "#007490", "#006584"
-          ),
-          c(0, 0.45, 0.65, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
+  }
+  color_table_gen_psi <- function(psi_var) {
+    scales::col_numeric(
+      scales::gradient_n_pal(
+        c(
+          "#FF0D50", "#FB7C82", "#FEABAC", "#FFD7D7", "#F2EFF2",
+          "#9AAABA", "#4B8AA1", "#007490", "#006584"
         ),
-        c(min(medfateland_var, na.rm = TRUE), max(medfateland_var, na.rm = TRUE)),
-        na.color = "#FFFFFF00", reverse = reverse, alpha = TRUE
-      )(medfateland_var)
-    }
-    return(res)
+        c(0, 0.45, 0.65, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
+      ),
+      c(min(psi_var, na.rm = TRUE), max(psi_var, na.rm = TRUE)),
+      na.color = "#FFFFFF00", reverse = FALSE, alpha = TRUE
+    )(psi_var)
   }
   color_tables <- terra::values(raster_platon_4326) |>
     dplyr::as_tibble() |>
@@ -107,6 +105,8 @@ create_medfateland_bitmap <- function(parquet_files) {
       .fns = color_table_gen,
       .names = "{.col}_colored"
     )) |>
+    # fix Psi with exp scale
+    dplyr::mutate(Psi_colored = color_table_gen_psi(Psi)) |>
     as.data.frame()
   # update raster color tables
   purrr::walk(

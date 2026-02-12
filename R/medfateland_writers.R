@@ -1,3 +1,27 @@
+.quality_control <- function(formatted_res_day) {
+
+  medfateland_vars <- c(
+    "Theta", "REW", "Psi", "PET", "Precipitation", "AET", "ELW",
+    "LAI", "DDS", "LFMC", "DFMC", "SFP", "CFP"
+  )
+  formatted_res_day |>
+    # temporal cleaning of -40 Psi values (NA to all variables when it happens)
+    dplyr::mutate(
+      dplyr::across(
+        dplyr::any_of(medfateland_vars),
+        ~ dplyr::if_else(.data$Psi == -40, NA_real_, .x)
+      )
+    ) |>
+    # temporal cleaning of DDS and LFMC NaN values (NA to all variables when it
+    # happens)
+    dplyr::mutate(
+      dplyr::across(
+        dplyr::any_of(medfateland_vars),
+        ~ dplyr::if_else(is.nan(DDS) | is.nan(LFMC), NA_real_, .x)
+      )
+    )
+}
+
 .format_medfateland_output <- function(res_day) {
   readRDS(res_day) |>
     dplyr::as_tibble() |>
@@ -90,7 +114,8 @@
     ) |>
     tidyr::unnest(soil_vars) |>
     tidyr::unnest(plant_vars) |>
-    dplyr::select(-state, -result)
+    dplyr::select(-state, -result) |>
+    .quality_control()
 }
 
 write_medfateland_parquet <- function(daily_model_files) {
@@ -115,7 +140,10 @@ write_medfateland_parquet <- function(daily_model_files) {
   withr::defer(mirai::daemons(0))
   mirai::everywhere({library(sf)})
   day_final_res <-
-    mirai::mirai_map(daily_model_files, .f = .format_medfateland_output)[] |>
+    mirai::mirai_map(
+      daily_model_files, .f = .format_medfateland_output,
+      .quality_control = .quality_control
+    )[] |>
     purrr::list_rbind()
   # day_final_res <- daily_model_files |>
   #   purrr::map(.f = .format_medfateland_output) |>
